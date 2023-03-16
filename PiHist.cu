@@ -42,7 +42,7 @@ __global__ void computeFrequency(int* de_frequency, char* de_digits, int numDigi
         atomicAdd(&(de_frequency[i]), local[i]);
         printf("test: %d", local[i]);
     }
-    printf("fuku %d", 1);
+    printf("ff %d", 1);
 }
 
 int main(int argc, char *argv[]) {
