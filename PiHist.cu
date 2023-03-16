@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <cuda_runtime.h>
 
 #define BLOCK_SIZE 1024
 
@@ -29,13 +30,10 @@ __global__ void computeFrequency(int* de_frequency, char* de_digits, int numDigi
     // Update shared de_frequency
     int index = threadIdx.x + blockIdx.x * blockDim.x;
     // Calculate the digits we need to skip because one thread only need to compute a part of all the digits that need to be processed
-    int skip = blockDim.x * gridDim.x;
-    while (index < numDigits) {
-        char digit = de_digits[index];
-        if (digit >= '0' && digit <= '9') {
-            atomicAdd(&(local[digit - '0']), 1);
-        }
-        index += skip;
+
+    char digit = de_digits[index];
+    if (index < numDigits && digit >= '0' && digit <= '9') {
+        local[digit-'0']++;
     }
     __syncthreads();
 
@@ -44,6 +42,7 @@ __global__ void computeFrequency(int* de_frequency, char* de_digits, int numDigi
         atomicAdd(&(de_frequency[i]), local[i]);
         printf("test: %d", local[i]);
     }
+    printf("fuku %d", 1);
 }
 
 int main(int argc, char *argv[]) {
@@ -94,7 +93,7 @@ int main(int argc, char *argv[]) {
     // Print the resulting frequency of digits
     for (int i = 0; i < 10; i++) {
         // Print the digit frequency in the format of digit: count
-       printf("%d:\t%f%%\n", i, (double)frequency[i]/numDigits);;
+       printf("%d:\t%d\n", i, frequency[i]);;
     }
 
     // Clean up
